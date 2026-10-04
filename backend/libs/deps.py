@@ -19,10 +19,14 @@ class Auth:
         public_key: str,
         audience: str = "shop",
         issuer: str = "auth-service",
+        access_token_type: str = "access",
+        algorithm: str = "RS256",
     ):
         self.public_key = public_key
         self.audience = audience
         self.issuer = issuer
+        self.access_token_type = access_token_type
+        self.algorithm = algorithm
 
     def current_user(
         self,
@@ -32,15 +36,17 @@ class Auth:
             payload = jwt.decode(
                 creds.credentials,
                 self.public_key,
-                algorithms=["RS256"],
+                algorithms=[self.algorithm],
                 audience=self.audience,
                 issuer=self.issuer,
             )
-            info = PayloadInfo(**payload)
-            return info
+            if payload.get("token_type") != self.access_token_type:
+                raise jwt.InvalidTokenError("Not an access token")
+            return PayloadInfo(**payload)
         except jwt.PyJWTError as e:
-            logger.error(e)
+            logger.warning("JWT rejected: %s", e)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
             )
