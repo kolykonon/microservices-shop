@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     postgres_url: str
 
+    redis_url: str
+
     jwt_private_key_path: Path = BASE_DIR / "keys" / "private.pem"
     jwt_public_key_path: Path = BASE_DIR / "keys" / "public.pem"
     jwt_encode_algorithm: str = "RS256"
