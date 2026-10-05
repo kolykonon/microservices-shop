@@ -28,3 +28,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["libs"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "libs"]
+
+[dependency-groups]
+dev = [
+    "black>=26.10.0",
+    "fakeredis>=2.39.0",
+    "httpx>=0.28.1",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.10",
+]

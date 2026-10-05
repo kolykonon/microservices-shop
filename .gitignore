@@ -9,3 +9,4 @@ wheels/
 .venv
 .env
 keys
+.ruff_cache
