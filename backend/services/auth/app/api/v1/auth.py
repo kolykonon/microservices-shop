@@ -1,5 +1,9 @@
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+
 from app.domain.schemas.token import RefreshTokenRequest, TokenInfo
 from app.domain.schemas.user import UserCreate, UserRead
 from app.domain.services.auth_service import AuthService, get_auth_service
@@ -11,10 +15,6 @@ from app.domain.services.user_service import UserService, get_user_service
 from app.domain.utils.jwt import decode_token, encode_token
 from app.infra.config import settings
 from app.infra.repo import UserRepo, get_user_repo
-from fastapi import APIRouter, Depends, Form, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
-
 from libs.deps import Auth
 from libs.schemas.payload import PayloadInfo
 

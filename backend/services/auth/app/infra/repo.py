@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from app.domain.models.user import UserModel
-from app.domain.schemas.user import UserCreateDB, UserUpdateDB
-from app.infra.db import get_session
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.domain.models.user import UserModel
+from app.domain.schemas.user import UserCreateDB, UserUpdateDB
+from app.infra.db import get_session
 
 
 class UserRepo:

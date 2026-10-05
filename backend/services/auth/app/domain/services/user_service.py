@@ -1,5 +1,7 @@
 from typing import Annotated
 
+from fastapi import Depends, HTTPException, status
+
 from app.domain.schemas.user import (
     UserCreate,
     UserCreateDB,
@@ -9,7 +11,6 @@ from app.domain.schemas.user import (
 )
 from app.domain.utils.security import hash_password
 from app.infra.repo import UserRepo, get_user_repo
-from fastapi import Depends, HTTPException, status
 
 
 class UserService:

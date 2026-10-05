@@ -1,10 +1,10 @@
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-from app.infra.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
+from app.infra.config import settings
 from libs.db import make_dependency
 
 

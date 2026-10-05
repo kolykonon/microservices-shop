@@ -3,9 +3,10 @@ import uuid
 from typing import Any
 
 import jwt
+from jwt.exceptions import InvalidTokenError
+
 from app.domain.schemas.token import IssuedToken
 from app.infra.config import settings
-from jwt.exceptions import InvalidTokenError
 
 
 def _calculate_lifetime(
