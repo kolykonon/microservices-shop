@@ -10,9 +10,9 @@ COPY libs/ libs/
 
 RUN uv sync --frozen --no-dev
 
-COPY services/auth/ services/auth/
+COPY services/catalog/ services/catalog/
 
-WORKDIR /app/services/auth
+WORKDIR /app/services/catalog
 
 CMD ["sh", "-c", "/app/.venv/bin/alembic upgrade head && /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000"]
 
