@@ -1,11 +1,11 @@
 from typing import Annotated
 
+from app.domain.models.user import UserModel
+from app.domain.schemas.user import UserCreateDB, UserUpdateDB
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.models.user import UserModel
-from app.domain.schemas.user import UserCreateDB, UserUpdateDB
 from app.infra.db import get_session
 
 
@@ -42,7 +42,7 @@ class UserRepo:
         new_user = UserModel(**data.model_dump())
         self.session.add(new_user)
         await self.session.commit()
-        await self.session.flush()
+        await self.session.refresh(new_user)
         return new_user
 
     async def update_user(
@@ -50,10 +50,10 @@ class UserRepo:
         user: UserModel,
         data: UserUpdateDB,
     ) -> UserModel:
-        for key, value in data.model_dump(exclude_unset=True):
+        for key, value in data.model_dump(exclude_unset=True).items():
             setattr(user, key, value)
         await self.session.commit()
-        await self.session.flush()
+        await self.session.refresh(user)
         return user
 
     async def delete_user(self, user: UserModel) -> None:

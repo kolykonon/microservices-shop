@@ -1,11 +1,11 @@
 from typing import Annotated
 
+from app.domain.schemas.token import RefreshTokenRequest, TokenInfo
+from app.domain.schemas.user import UserCreate, UserRead
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from app.domain.schemas.token import RefreshTokenRequest, TokenInfo
-from app.domain.schemas.user import UserCreate, UserRead
 from app.domain.services.auth_service import AuthService, get_auth_service
 from app.domain.services.token_store import (
     RefreshTokenStore,

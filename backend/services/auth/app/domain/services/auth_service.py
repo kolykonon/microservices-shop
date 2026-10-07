@@ -1,8 +1,8 @@
 from typing import Annotated
 
+from app.domain.models.user import UserModel
 from fastapi import Depends, HTTPException, status
 
-from app.domain.models.user import UserModel
 from app.domain.utils.security import dummy_hash, verify_password
 from app.infra.repo import UserRepo, get_user_repo
 

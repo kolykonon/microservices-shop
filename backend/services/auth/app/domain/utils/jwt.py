@@ -2,10 +2,10 @@ import datetime
 import uuid
 from typing import Any
 
-import jwt
+from app.domain.schemas.token import IssuedToken
 from jwt.exceptions import InvalidTokenError
 
-from app.domain.schemas.token import IssuedToken
+import jwt
 from app.infra.config import settings
 
 
