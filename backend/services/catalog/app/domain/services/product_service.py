@@ -1,8 +1,6 @@
 from collections.abc import Sequence
 from typing import Annotated, override
 
-from fastapi import Depends, HTTPException, status
-
 from app.domain.models.product import Product
 from app.domain.schemas.product import (
     ProductCreate,
@@ -12,6 +10,8 @@ from app.domain.schemas.product import (
 )
 from app.infra.repositories.category_repo import CategoryRepo, CategoryRepoDep
 from app.infra.repositories.product_repo import ProductRepo, ProductRepoDep
+from fastapi import Depends, HTTPException, status
+
 from libs.base_service import BaseService
 
 
@@ -71,6 +71,10 @@ class ProductService(BaseService[Product, ProductCreate, ProductUpdate, ProductR
             await self._ensure_category_exists(data.category_id)
         product = await self.repo.update(product, data)
         return ProductRead.model_validate(product)
+
+    async def get_by_ids(self, ids: Sequence[int]) -> Sequence[ProductRead]:
+        ids = await self.repo.get_product_list_by_ids(ids)
+        return [ProductRead.model_validate(product) for product in ids]
 
 
 def get_product_service(

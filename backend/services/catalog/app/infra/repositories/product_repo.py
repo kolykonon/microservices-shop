@@ -1,13 +1,13 @@
 from collections.abc import Sequence
 from typing import Annotated
 
+from app.domain.models.product import Product
+from app.infra.db import get_session
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.domain.models.product import Product
-from app.infra.db import get_session
 from libs.base_repo import BaseRepo
 
 
@@ -41,6 +41,11 @@ class ProductRepo(BaseRepo[Product]):
             .offset(offset)
             .limit(limit)
         )
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def get_product_list_by_ids(self, ids: Sequence[int]) -> Sequence[Product]:
+        query = select(self.model).where(self.model.id.in_(ids))
         result = await self.session.execute(query)
         return result.scalars().all()
 

@@ -1,10 +1,16 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from app.api.v1.auth import router as auth_router
+from fastapi import FastAPI
 
 app = FastAPI()
 
 app.include_router(auth_router)
+
+
+@asynccontextmanager
+async def lifespan():
+    yield
 
 
 @app.get("/health")

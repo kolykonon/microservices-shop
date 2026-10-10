@@ -1,8 +1,5 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, status
-
-from app.api.deps import CurrentUser
 from app.domain.schemas.product import (
     ProductCreate,
     ProductRead,
@@ -10,8 +7,11 @@ from app.domain.schemas.product import (
     ProductUpdate,
 )
 from app.domain.services.product_service import ProductServiceDep
+from fastapi import APIRouter, Query, status
 
-router = APIRouter(prefix="/product", tags=["product"])
+from app.api.deps import CurrentUser
+
+router = APIRouter(prefix="/products", tags=["product"])
 
 
 @router.get("/", response_model=list[ProductRead])
@@ -24,6 +24,13 @@ async def product_list(
     if category_id is not None:
         return await product_service.get_list_by_category(category_id, offset, limit)
     return await product_service.get_list(offset, limit)
+
+
+@router.get("/products-by-ids", response_model=list[ProductRead])
+async def get_products_by_ids(
+    product_service: ProductServiceDep, ids: Annotated[list[int], Query(...)]
+):
+    return await product_service.get_by_ids(ids)
 
 
 @router.get("/{product_id}", response_model=ProductReadWithCategory)
