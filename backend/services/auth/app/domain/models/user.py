@@ -6,8 +6,6 @@ from libs.mixins import IDMixin, TimeStampMixin
 
 
 class UserModel(Base, IDMixin, TimeStampMixin):
-    """ORM модель пользователя"""
-
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
