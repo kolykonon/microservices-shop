@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from typing import Annotated
 
+from fastapi import Depends
 from redis.asyncio import Redis
 
 from app.infra.config import settings
@@ -12,4 +13,4 @@ async def get_redis() -> AsyncIterator[Redis]:
     yield redis_client
 
 
-RedisDep = Annotated[Redis, settings.redis_url]
+RedisDep = Annotated[Redis, Depends(get_redis)]
