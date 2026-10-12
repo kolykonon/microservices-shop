@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -13,4 +14,4 @@ class Base(DeclarativeBase):
 
 get_session = make_dependency(settings.postgres_url)
 
-SessionDep = Annotated[AsyncSession, get_session]
+SessionDep = Annotated[AsyncSession, Depends(get_session)]

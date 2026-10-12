@@ -42,7 +42,7 @@ class UserCreateDB(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     email: str
-    hashed_password: SecretStr
+    hashed_password: str
 
 
 class UserUpdate(BaseModel):

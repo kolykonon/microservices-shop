@@ -30,7 +30,7 @@ class UserService:
         if existed_user:
             raise AlreadyExistsError(f"User with email {data.email} already exists")
 
-        hashed_password = hash_password(data.password)
+        hashed_password = hash_password(data.password.get_secret_value())
         user_db_schema = UserCreateDB(email=data.email, hashed_password=hashed_password)
 
         new_user = await self.repo.create_user(user_db_schema)

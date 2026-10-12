@@ -1,4 +1,3 @@
-from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends
@@ -14,4 +13,4 @@ class Base(DeclarativeBase): ...
 
 get_session = make_dependency(settings.postgres_url)
 
-SessionDep = Annotated[AsyncIterator[AsyncSession], Depends(get_session)]
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
