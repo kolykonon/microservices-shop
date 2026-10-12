@@ -37,6 +37,26 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
   auth:
     build:
       { context: ..,
@@ -47,11 +67,16 @@ services:
       REDIS_URL: redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:6379/0
       JWT_PRIVATE_KEY_PATH: /keys/private.pem
       JWT_PUBLIC_KEY_PATH: /keys/public.pem
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     volumes:
       - ../keys:/keys:ro
     ports: [ "8001:8000" ]
     depends_on:
       postgres:
+        { condition: service_healthy }
+      redis:
+        { condition: service_started }
+      rabbitmq:
         { condition: service_healthy }
 
   catalog:
@@ -90,3 +115,4 @@ services:
 volumes:
   pgdata:
   redis-data:
+  rabbitmq-data:
