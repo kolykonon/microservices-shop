@@ -11,12 +11,15 @@ from app.domain.schemas.user import (
     UserUpdateDB,
 )
 from app.domain.utils.security import hash_password
+from app.infra.rabbit import RabbitDep
 from app.infra.repo import UserRepoDep
+from libs.events import UserRegistered
 
 
 class UserService:
-    def __init__(self, repo: UserRepoDep):
+    def __init__(self, repo: UserRepoDep, rabbit: RabbitDep):
         self.repo = repo
+        self.rabbit = rabbit
 
     async def get_user_by_email(self, email: str) -> UserRead | None:
         user = await self.repo.get_user_by_email(email)
@@ -34,6 +37,9 @@ class UserService:
         user_db_schema = UserCreateDB(email=data.email, hashed_password=hashed_password)
 
         new_user = await self.repo.create_user(user_db_schema)
+        await self.rabbit.publish(
+            UserRegistered(user_id=new_user.id, email=new_user.email)
+        )
         return UserRead.model_validate(new_user)
 
     async def update_user(self, user_id: int, data: UserUpdate) -> UserRead:
@@ -53,8 +59,8 @@ class UserService:
         await self.repo.delete_user(existed)
 
 
-def get_user_service(repo: UserRepoDep) -> UserService:
-    return UserService(repo)
+def get_user_service(repo: UserRepoDep, rabbit: RabbitDep) -> UserService:
+    return UserService(repo,rabbit)
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]

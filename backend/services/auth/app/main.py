@@ -4,12 +4,16 @@ from fastapi import FastAPI
 
 from app.api.exception_handlers import register_exception_handlers
 from app.api.v1 import router
+from app.infra.config import settings
 from app.infra.redis import redis_client
+from libs.rabbit import Rabbit
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app: FastAPI):
+    app.state.rabbit = await Rabbit.connect(settings.rabbit_url)
     yield
+    await app.state.rabbit.close()
     await redis_client.aclose()
 
 
