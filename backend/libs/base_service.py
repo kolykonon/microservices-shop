@@ -8,10 +8,10 @@ from libs.base_repo import BaseRepo
 
 
 class BaseService[
-ModelT,
-CreateT: BaseModel,
-UpdateT: BaseModel,
-ReadT: BaseModel,
+    ModelT,
+    CreateT: BaseModel,
+    UpdateT: BaseModel,
+    ReadT: BaseModel,
 ]:
     read_schema = type[ReadT]
 
@@ -32,9 +32,9 @@ ReadT: BaseModel,
         return self.read_schema.model_validate(obj)
 
     async def get_list(
-            self,
-            offset: int = 0,
-            limit: int = 100,
+        self,
+        offset: int = 0,
+        limit: int = 100,
     ) -> Sequence[ReadT]:
         objs = await self.repo.get_list(offset, limit)
         return [self.read_schema.model_validate(obj) for obj in objs]
@@ -51,4 +51,3 @@ ReadT: BaseModel,
     async def delete(self, id: int) -> None:
         obj = await self._get_or_404(id)
         await self.repo.delete(obj)
-

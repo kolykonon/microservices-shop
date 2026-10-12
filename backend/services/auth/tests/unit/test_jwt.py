@@ -3,7 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 from jwt.exceptions import InvalidTokenError
 
-from app.domain.utils.jwt_token import _calculate_lifetime, _form_jwt_payload, encode_token
+from app.domain.utils.jwt_token import (
+    _calculate_lifetime,
+    _form_jwt_payload,
+    encode_token,
+)
 from app.infra.config import settings
 
 

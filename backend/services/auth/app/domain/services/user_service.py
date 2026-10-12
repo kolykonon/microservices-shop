@@ -60,7 +60,7 @@ class UserService:
 
 
 def get_user_service(repo: UserRepoDep, rabbit: RabbitDep) -> UserService:
-    return UserService(repo,rabbit)
+    return UserService(repo, rabbit)
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
