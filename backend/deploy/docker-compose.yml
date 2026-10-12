@@ -67,7 +67,7 @@ services:
       REDIS_URL: redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:6379/0
       JWT_PRIVATE_KEY_PATH: /keys/private.pem
       JWT_PUBLIC_KEY_PATH: /keys/public.pem
-      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     volumes:
       - ../keys:/keys:ro
     ports: [ "8001:8000" ]
