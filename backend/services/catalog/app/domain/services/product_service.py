@@ -1,6 +1,8 @@
 from collections.abc import Sequence
 from typing import Annotated, override
 
+from fastapi import Depends, HTTPException, status
+
 from app.domain.models.product import Product
 from app.domain.schemas.product import (
     ProductCreate,
@@ -10,8 +12,6 @@ from app.domain.schemas.product import (
 )
 from app.infra.repositories.category_repo import CategoryRepo, CategoryRepoDep
 from app.infra.repositories.product_repo import ProductRepo, ProductRepoDep
-from fastapi import Depends, HTTPException, status
-
 from libs.base_service import BaseService
 
 

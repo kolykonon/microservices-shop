@@ -57,6 +57,8 @@ class Rabbit:
         event_type: type[E],
         handler: Callable[[E], Awaitable[None]],
         prefetch_count: int = 10,
+        max_retries: int = 3,
+        retry_delay_ms: int = 5000,
     ) -> None:
         channel = await self.connection.channel()
         await channel.set_qos(prefetch_count=prefetch_count)
@@ -64,10 +66,44 @@ class Rabbit:
         queue = await channel.declare_queue(queue_name, durable=True)
         await queue.bind(exchange, routing_key=event_type.routing_key)
 
+        retry_queue_name = f"{queue_name}.retry"
+        dlq_name = f"{queue_name}.dlq"
+        await channel.declare_queue(
+            retry_queue_name,
+            durable=True,
+            arguments={
+                "x-message-ttl": retry_delay_ms,
+                "x-dead-letter-exchange": "",
+                "x-dead-letter-routing-key": queue_name,
+            },
+        )
+        await channel.declare_queue(dlq_name, durable=True)
+
         async with queue.iterator() as messages:
             async for message in messages:
-                try:
-                    async with message.process(requeue=False):
+                async with message.process(requeue=False):
+                    try:
                         await handler(event_type.model_validate_json(message.body))
-                except Exception:
-                    logger.exception("Failed to process message %s", message.message_id)
+                    except Exception:
+                        retries = int((message.headers or {}).get("x-retries", 0))
+                        target = retry_queue_name if retries < max_retries else dlq_name
+                        logger.exception(
+                            "Failed to process message %s, attempt %s, sending to %s",
+                            message.message_id,
+                            retries + 1,
+                            target,
+                        )
+                        await channel.default_exchange.publish(
+                            aio_pika.Message(
+                                body=message.body,
+                                content_type=message.content_type,
+                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                                message_id=message.message_id,
+                                type=message.type,
+                                headers={
+                                    **(message.headers or {}),
+                                    "x-retries": retries + 1,
+                                },
+                            ),
+                            routing_key=target,
+                        )

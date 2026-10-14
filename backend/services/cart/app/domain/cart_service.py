@@ -38,7 +38,7 @@ class CartService:
         )
 
     async def add_to_cart(self, user_id: int, data: CartItemAdd) -> None:
-        product = self.catalog_client.get_product_by_id(data.product_id)
+        await self.catalog_client.get_product_by_id(data.product_id)
         await self.cart_repo.add_to_cart(user_id, CartItem(**data.model_dump()))
 
     async def remove_from_cart(self, user_id: int, product_id: int) -> None:

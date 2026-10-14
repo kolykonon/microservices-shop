@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from typing import Any, ClassVar
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel

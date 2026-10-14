@@ -1,6 +1,3 @@
-import pwdlib
-import pytest
-
 from app.domain.utils.security import hash_password, verify_password
 
 test_pwd = "TEST_PASSWORD"

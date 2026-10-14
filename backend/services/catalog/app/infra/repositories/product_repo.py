@@ -1,13 +1,13 @@
 from collections.abc import Sequence
 from typing import Annotated
 
-from app.domain.models.product import Product
-from app.infra.db import get_session
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.domain.models.product import Product
+from app.infra.db import get_session
 from libs.base_repo import BaseRepo
 
 

@@ -2,9 +2,8 @@ import time
 from typing import Annotated
 
 from fastapi import Depends
-from redis.asyncio import Redis
 
-from app.infra.redis import RedisDep, get_redis
+from app.infra.redis import RedisDep
 
 
 class RefreshTokenStore:
@@ -65,7 +64,7 @@ class RefreshTokenStore:
 
 
 def get_token_store(
-    redis: Annotated[Redis, Depends(get_redis)],
+    redis: RedisDep,
 ) -> RefreshTokenStore:
     return RefreshTokenStore(redis)
 
