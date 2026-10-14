@@ -13,6 +13,10 @@ services:
       CATALOG_DB_USER: ${CATALOG_DB_USER}
       CATALOG_DB_PASSWORD: ${CATALOG_DB_PASSWORD}
       CATALOG_DB_NAME: ${CATALOG_DB_NAME}
+
+      ORDER_DB_USER: ${ORDER_DB_USER}
+      ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      ORDER_DB_NAME: ${ORDER_DB_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -104,12 +108,38 @@ services:
     environment:
       REDIS_URL: redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:6379/1
       JWT_PUBLIC_KEY_PATH: /keys/public.pem
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     volumes:
       - ../keys/public.pem:/keys/public.pem:ro
     ports: [ "8003:8000" ]
     depends_on:
       redis:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  order:
+    build:
+      {
+        context: ..,
+        dockerfile: services/order/Dockerfile
+      }
+    env_file: ../services/order/.env
+    environment:
+      POSTGRES_URL: postgresql+asyncpg://${ORDER_DB_USER}:${ORDER_DB_PASSWORD}@postgres:5432/${ORDER_DB_NAME}
+      JWT_PUBLIC_KEY_PATH: /keys/public.pem
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    volumes:
+      - ../keys/public.pem:/keys/public.pem:ro
+    ports: [ "8004:8000" ]
+    depends_on:
+      postgres:
+        { condition: service_healthy }
+      cart:
+        { condition: service_started }
+      rabbitmq:
+        { condition: service_healthy }
+
   notifications:
     build:
       {
