@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         env_file=SERVICE_DIR / ".env",
     )
     redis_url: str
+    rabbit_url: str
     cart_ttl_seconds: int = 60 * 60 * 24 * 7
     cart_catalog_url: str = "http://catalog:8000/api/v1"
 

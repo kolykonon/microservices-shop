@@ -17,3 +17,11 @@ class UserRegistered(Event):
 
     user_id: int
     email: str
+
+
+class OrderCreated(Event):
+    routing_key: ClassVar[str] = "order.created"
+
+    user_id: int
+    order_id: int
+    created_at: datetime
