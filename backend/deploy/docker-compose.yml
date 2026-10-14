@@ -110,6 +110,18 @@ services:
     depends_on:
       redis:
         condition: service_started
+  notifications:
+    build:
+      {
+        context: ..,
+        dockerfile: services/notifications/Dockerfile
+      }
+    env_file: ../services/notifications/.env
+    environment:
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 
 volumes:
