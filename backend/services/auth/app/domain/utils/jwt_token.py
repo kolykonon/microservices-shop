@@ -3,26 +3,21 @@ import uuid
 from typing import Any
 
 import jwt
+
 from app.domain.schemas.token import IssuedToken
 from app.infra.config import settings
-from jwt.exceptions import InvalidTokenError
 
 
-def _calculate_lifetime(
-    token_type: str,
-) -> datetime.timedelta:
+def _calculate_lifetime(token_type: str) -> datetime.timedelta:
     if token_type == settings.jwt_access_token_type:
         return datetime.timedelta(minutes=settings.jwt_access_token_expire_minutes)
     elif token_type == settings.jwt_refresh_token_type:
         return datetime.timedelta(days=settings.jwt_refresh_token_expire_days)
     else:
-        raise InvalidTokenError("Unknown token type")
+        raise jwt.exceptions.InvalidTokenError("Unknown token type")
 
 
-def _form_jwt_payload(
-    payload: dict[str, Any],
-    token_type: str,
-) -> dict[str, Any]:
+def _form_jwt_payload(payload: dict[str, Any], token_type: str) -> dict[str, Any]:
     now = datetime.datetime.now(datetime.UTC)
     return {
         **payload,
@@ -35,10 +30,7 @@ def _form_jwt_payload(
     }
 
 
-def encode_token(
-    payload: dict[str, Any],
-    token_type: str,
-) -> IssuedToken:
+def encode_token(payload: dict[str, Any], token_type: str) -> IssuedToken:
     token_data = _form_jwt_payload(payload, token_type)
     token = jwt.encode(
         payload=token_data,
@@ -62,5 +54,5 @@ def decode_token(token: str, expected_type: str | None = None) -> dict[str, Any]
         options={"require": ["exp", "iat", "sub", "jti"]},
     )
     if expected_type is not None and payload.get("token_type") != expected_type:
-        raise InvalidTokenError("Unexpected token type")
+        raise jwt.exceptions.InvalidTokenError("Unexpected token type")
     return payload

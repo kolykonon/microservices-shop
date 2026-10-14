@@ -9,13 +9,13 @@ SERVICE_DIR = Path(__file__).resolve().parents[2]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=SERVICE_DIR / ".env",
-        case_sensitive=False,
+        env_file=SERVICE_DIR / ".env", case_sensitive=False
     )
 
     postgres_url: str
 
     redis_url: str
+    rabbit_url: str
 
     jwt_private_key_path: Path = BASE_DIR / "keys" / "private.pem"
     jwt_public_key_path: Path = BASE_DIR / "keys" / "public.pem"
@@ -26,6 +26,4 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
 
-settings = (
-    Settings()
-)  # pyright: ignore[reportCallIssue] pyright видит как обычный __init__()
+settings = Settings()  # pyright: ignore[reportCallIssue] pyright видит как обычный __init__()

@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ "main", "dev" ]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          working-directory: backend
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Ruff (format check)
+        run: uv run ruff format --check --diff .
+
+      - name: Ruff (lint)
+        run: uv run ruff check --output-format=github .
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: auth_test
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/auth_test
+      REDIS_URL: redis://localhost:6379/0
+      RABBIT_URL: amqp://guest:guest@localhost:5672/
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          working-directory: backend
+
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Generate JWT keys
+        run: |
+          mkdir -p keys
+          openssl genrsa -out keys/private.pem 2048
+          openssl rsa -in keys/private.pem -pubout -out keys/public.pem
+
+      - name: Pytest
+        working-directory: backend/services/auth
+        run: uv run pytest -v
+
+      - name: Alembic check
+        working-directory: backend/services/auth
+        run: |
+          uv run alembic upgrade head
+          uv run alembic check

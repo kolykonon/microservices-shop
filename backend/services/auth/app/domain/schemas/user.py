@@ -1,74 +1,70 @@
+import re
 from datetime import datetime
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    SecretStr,
+    field_validator,
+)
+
+PASSWORD_RULES = (
+    (re.compile(r"[a-z]"), "Password must contain a lowercase letter"),
+    (re.compile(r"[A-Z]"), "Password must contain an uppercase letter"),
+    (re.compile(r"\d"), "Password must contain a digit"),
+    (re.compile(r"[^\w\s]"), "Password must contain a special character"),
+)
 
 
-def validate_email(email: str) -> bool:
-    return True
-
-
-def validate_password(password: str) -> bool:
-    return True
+def check_password(password: str) -> str:
+    if any(ch.isspace() for ch in password):
+        raise ValueError("Password must not contain whitespace")
+    for pattern, message in PASSWORD_RULES:
+        if not pattern.search(password):
+            raise ValueError(message)
+    return password
 
 
 class UserCreate(BaseModel):
-    email: str = Field(max_length=100)
-    password: str = Field(min_length=8, max_length=72)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: str) -> str:
-        if not validate_email(v):
-            raise ValidationError("Error while validating email")
-        return v
+    email: EmailStr = Field(max_length=100)
+    password: SecretStr = Field(min_length=8, max_length=72)
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not validate_password(v):
-            raise ValidationError("Error while validating password")
+    def validate_password(cls, v: SecretStr) -> SecretStr:
+        check_password(v.get_secret_value())
         return v
 
 
 class UserCreateDB(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     email: str
     hashed_password: str
 
-    class Config:
-        from_attributes = True
-
 
 class UserUpdate(BaseModel):
-    email: str | None = Field(max_length=100)
-    password: str | None = Field(min_length=8, max_length=72)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: str) -> str:
-        if not validate_email(v):
-            raise ValidationError("Error while validating email")
-        return v
+    email: EmailStr | None = Field(default=None, max_length=100)
+    password: str | None = Field(default=None, min_length=8, max_length=72)
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not validate_password(v):
-            raise ValidationError("Error while validating password")
-        return v
+    def validate_password(cls, v: str | None) -> str | None:
+        return None if v is None else check_password(v)
 
 
 class UserUpdateDB(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     email: str | None
     hashed_password: str | None
 
-    class Config:
-        from_attributes = True
-
 
 class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     email: str | None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True

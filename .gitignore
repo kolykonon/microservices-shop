@@ -6,6 +6,8 @@ dist/
 wheels/
 *.egg-info
 
+.idea
 .venv
 .env
 keys
+.ruff_cache
