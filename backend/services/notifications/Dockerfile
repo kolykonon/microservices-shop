@@ -14,5 +14,5 @@ COPY services/notifications/ services/notifications/
 
 WORKDIR /app/services/notifications
 
-CMD ["sh", "-c", "python -m app.main"]
+CMD ["/app/.venv/bin/python", "-m", "app.main"]
 
