@@ -35,6 +35,9 @@ packages = ["libs"]
 [tool.ruff.lint.isort]
 known-first-party = ["app", "libs"]
 
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/**" = ["F401", "UP", "I001"]
+
 [dependency-groups]
 dev = [
     "black>=26.10.0",
