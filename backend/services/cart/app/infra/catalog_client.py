@@ -23,10 +23,7 @@ class CatalogClient:
         return [ProductRead.model_validate(item) for item in result]
 
     async def get_product_by_id(self, product_id: int) -> ProductRead:
-        result = await self.client.get(
-            url="/products/",
-            params={"id": product_id},
-        )
+        result = await self.client.get(url=f"/products/{product_id}")
         result.raise_for_status()
         result = result.json()
         return ProductRead.model_validate(result)
