@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from app.domain.models.outbox_message import OutboxMessage  # pyright: ignore[reportUnusedImport]
 from app.domain.models.user import UserModel  # pyright: ignore[reportUnusedImport]
 from app.infra.db import Base
 from services.auth.app.infra.config import settings
