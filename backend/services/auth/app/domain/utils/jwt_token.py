@@ -7,6 +7,9 @@ import jwt
 from app.domain.schemas.token import IssuedToken
 from app.infra.config import settings
 
+JWT_PUBLIC_KEY = settings.jwt_public_key_path.read_text()
+JWT_PRIVATE_KEY = settings.jwt_private_key_path.read_text()
+
 
 def _calculate_lifetime(token_type: str) -> datetime.timedelta:
     if token_type == settings.jwt_access_token_type:
@@ -23,8 +26,8 @@ def _form_jwt_payload(payload: dict[str, Any], token_type: str) -> dict[str, Any
         **payload,
         "iat": now,
         "exp": now + _calculate_lifetime(token_type),
-        "iss": "auth-service",
-        "aud": "shop",
+        "iss": settings.jwt_token_issuer,
+        "aud": settings.jwt_token_audience,
         "jti": str(uuid.uuid4()),
         "token_type": token_type,
     }
@@ -34,7 +37,7 @@ def encode_token(payload: dict[str, Any], token_type: str) -> IssuedToken:
     token_data = _form_jwt_payload(payload, token_type)
     token = jwt.encode(
         payload=token_data,
-        key=settings.jwt_private_key_path.read_text(),
+        key=JWT_PRIVATE_KEY,
         algorithm=settings.jwt_encode_algorithm,
     )
     return IssuedToken(
@@ -47,10 +50,10 @@ def encode_token(payload: dict[str, Any], token_type: str) -> IssuedToken:
 def decode_token(token: str, expected_type: str | None = None) -> dict[str, Any]:
     payload = jwt.decode(
         jwt=token,
-        key=settings.jwt_public_key_path.read_text(),
+        key=JWT_PUBLIC_KEY,
         algorithms=[settings.jwt_encode_algorithm],
-        audience="shop",
-        issuer="auth-service",
+        audience=settings.jwt_token_audience,
+        issuer=settings.jwt_token_issuer,
         options={"require": ["exp", "iat", "sub", "jti"]},
     )
     if expected_type is not None and payload.get("token_type") != expected_type:
