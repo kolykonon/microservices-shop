@@ -26,8 +26,7 @@ class UserRepo:
     async def create_user(self, data: UserCreateDB) -> UserModel:
         new_user = UserModel(**data.model_dump())
         self.session.add(new_user)
-        await self.session.commit()
-        await self.session.refresh(new_user)
+        await self.session.flush()
         return new_user
 
     async def update_user(self, user: UserModel, data: UserUpdateDB) -> UserModel:
