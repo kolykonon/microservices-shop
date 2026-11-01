@@ -12,3 +12,6 @@ wheels/
 .env
 keys
 .ruff_cache
+node_modules
+.mypy_cache
+.pytest_cache
