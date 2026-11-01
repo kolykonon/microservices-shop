@@ -72,10 +72,6 @@ class ProductService(BaseService[Product, ProductCreate, ProductUpdate, ProductR
         product = await self.repo.update(product, data)
         return ProductRead.model_validate(product)
 
-    async def get_by_ids(self, ids: Sequence[int]) -> Sequence[ProductRead]:
-        ids = await self.repo.get_product_list_by_ids(ids)
-        return [ProductRead.model_validate(product) for product in ids]
-
 
 def get_product_service(
     repo: ProductRepoDep,
