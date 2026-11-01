@@ -15,4 +15,3 @@ COPY services/order/ services/order/
 WORKDIR /app/services/order
 
 CMD ["sh", "-c", "/app/.venv/bin/alembic upgrade head && /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000"]
-
