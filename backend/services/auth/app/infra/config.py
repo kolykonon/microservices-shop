@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     jwt_refresh_token_type: str = "refresh"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 7
+    jwt_token_issuer: str = "auth-service"
+    jwt_token_audience: str = "shop"
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue] pyright видит как обычный __init__()
