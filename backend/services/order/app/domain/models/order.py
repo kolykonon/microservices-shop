@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, Numeric
+from sqlalchemy import Enum, Index, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infra.db import Base
@@ -21,11 +21,9 @@ class OrderStatus(StrEnum):
 
 class Order(Base, IDMixin, TimeStampMixin):
     __tablename__ = "orders"
+    __table_args__ = (Index("idx_orders_user_created", "user_id", "created_at"),)
 
-    user_id: Mapped[int] = mapped_column(
-        index=True,
-        nullable=False,
-    )
+    user_id: Mapped[int] = mapped_column(nullable=False)
     status: Mapped[OrderStatus] = mapped_column(
         Enum(
             OrderStatus,
