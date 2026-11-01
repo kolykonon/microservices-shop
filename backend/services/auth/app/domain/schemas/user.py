@@ -58,8 +58,8 @@ class UserUpdate(BaseModel):
 class UserUpdateDB(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    email: str | None
-    hashed_password: str | None
+    email: str | None = None
+    hashed_password: str | None = None
 
 
 class UserRead(BaseModel):
