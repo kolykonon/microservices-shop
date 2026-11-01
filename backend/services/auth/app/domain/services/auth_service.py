@@ -3,14 +3,18 @@ from typing import Annotated
 from fastapi import Depends
 from jwt import InvalidTokenError
 
-from app.domain.exceptions import InvalidCredentialsError, InvalidRefreshTokenError
+from app.domain.exceptions import (
+    InvalidCredentialsError,
+    InvalidRefreshTokenError,
+    NotFoundError,
+)
 from app.domain.schemas.token import RefreshTokenRequest, TokenInfo
 from app.domain.schemas.user import UserRead
 from app.domain.services.token_store import TokenStoreDep
 from app.domain.utils.jwt_token import decode_token, encode_token
 from app.domain.utils.security import dummy_hash, verify_password
 from app.infra.config import settings
-from app.infra.repo import UserRepoDep
+from app.infra.user_repo import UserRepoDep
 from libs.schemas.payload import PayloadInfo
 
 
@@ -19,7 +23,7 @@ class AuthService:
         self.user_repo = user_repo
         self.store = store
 
-    async def __issue_tokens(self, user_id: str) -> TokenInfo:
+    async def _issue_tokens(self, user_id: str) -> TokenInfo:
         payload = {"sub": user_id}
         access = encode_token(payload, settings.jwt_access_token_type)
         refresh = encode_token(payload, settings.jwt_refresh_token_type)
@@ -35,19 +39,24 @@ class AuthService:
         if not verify_password(password, existed.hashed_password):
             raise InvalidCredentialsError("Wrong email or password")
 
-        return await self.__issue_tokens(str(existed.id))
+        return await self._issue_tokens(str(existed.id))
 
     async def refresh_token(self, data: RefreshTokenRequest) -> TokenInfo:
         try:
             payload = decode_token(
                 data.refresh_token, expected_type=settings.jwt_refresh_token_type
             )
-        except InvalidTokenError:
-            raise InvalidRefreshTokenError("Invalid refresh token")
+        except InvalidTokenError as e:
+            raise InvalidRefreshTokenError("Invalid refresh token") from e
+
         if not await self.store.consume(payload["jti"]):
             await self.store.revoke_all(payload["sub"])
             raise InvalidRefreshTokenError("Invalid refresh token")
-        return await self.__issue_tokens(payload["sub"])
+
+        if not await self.user_repo.get_user_by_id(int(payload["sub"])):
+            raise NotFoundError("User not found")
+
+        return await self._issue_tokens(payload["sub"])
 
     async def logout(self, data: RefreshTokenRequest) -> None:
         try:
@@ -64,6 +73,8 @@ class AuthService:
 
     async def get_me(self, payload: PayloadInfo) -> UserRead:
         user = await self.user_repo.get_user_by_id(int(payload.sub))
+        if not user:
+            raise NotFoundError("User not found")
         return UserRead.model_validate(user, extra="ignore")
 
 
