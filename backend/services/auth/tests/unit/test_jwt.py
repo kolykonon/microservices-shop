@@ -29,17 +29,17 @@ def test_calculate_lifetime():
 
 def test_form_jwt_payload(payload):
     formed_payload = _form_jwt_payload(payload, settings.jwt_access_token_type)
-    assert isinstance(formed_payload["iat"], datetime) == True
-    assert isinstance(formed_payload["exp"], datetime) == True
+    assert isinstance(formed_payload["iat"], datetime)
+    assert isinstance(formed_payload["exp"], datetime)
     assert formed_payload["exp"] > formed_payload["iat"]
     assert formed_payload["iss"] == "auth-service"
     assert formed_payload["aud"] == "shop"
-    assert isinstance(formed_payload["jti"], str) == True
+    assert isinstance(formed_payload["jti"], str)
     assert formed_payload["token_type"] == settings.jwt_access_token_type
 
 
 def test_encode_token(payload):
     access_token = encode_token(payload, settings.jwt_access_token_type)
-    assert isinstance(access_token.jti, str) == True
-    assert isinstance(access_token.token, str) == True
-    assert isinstance(access_token.expires_at, int) == True
+    assert isinstance(access_token.jti, str)
+    assert isinstance(access_token.token, str)
+    assert isinstance(access_token.expires_at, int)

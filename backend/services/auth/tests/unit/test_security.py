@@ -9,12 +9,12 @@ def test_hash_password_is_not_plain():
 
 def test_correct_password_is_verified():
     hashed = hash_password(test_pwd)
-    assert verify_password(test_pwd, hashed) == True
+    assert verify_password(test_pwd, hashed)
 
 
 def test_incorrect_password_is_not_verified():
     hashed = hash_password("IncorrectPassword")
-    assert verify_password(test_pwd, hashed) == False
+    assert not verify_password(test_pwd, hashed)
 
 
 def test_same_password_gives_diff_hashes():
