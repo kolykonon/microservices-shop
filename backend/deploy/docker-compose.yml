@@ -17,6 +17,11 @@ services:
       ORDER_DB_USER: ${ORDER_DB_USER}
       ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
       ORDER_DB_NAME: ${ORDER_DB_NAME}
+
+      INVENTORY_DB_USER: ${INVENTORY_DB_USER}
+      INVENTORY_DB_PASSWORD: ${INVENTORY_DB_PASSWORD}
+      INVENTORY_DB_NAME: ${INVENTORY_DB_NAME}
+
     ports:
       - "5432:5432"
     volumes:
@@ -151,6 +156,23 @@ services:
       RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     depends_on:
       rabbitmq:
+        condition: service_healthy
+
+  inventory:
+    build:
+      {
+        context: ..,
+        dockerfile: services/inventory/Dockerfile
+      }
+    env_file: ../services/inventory/.env
+    environment:
+      - JWT_PUBLIC_KEY_PATH=/keys/public.pem
+      - POSTGRES_URL=postgresql+asyncpg://${INVENTORY_DB_USER}:${INVENTORY_DB_PASSWORD}@postgres:5432/${INVENTORY_DB_NAME}
+    volumes:
+      - ../keys/public.pem:/keys/public.pem:ro
+    ports: [ "8005:8000" ]
+    depends_on:
+      postgres:
         condition: service_healthy
 
 
